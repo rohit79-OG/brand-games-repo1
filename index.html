@@ -2969,41 +2969,59 @@
        }
 
        function checkRoundComplete() {
-           const allOrbs = document.querySelectorAll('.sensory-orb');
-           const matchedOrbs = document.querySelectorAll('.sensory-orb.matched');
-           const unmatched = document.querySelectorAll('.sensory-orb:not(.matched)');
+    // MOBILE FIX: Remove duplicate orbs before checking
+       const orbIds = new Set();
+       const duplicateOrbs = [];
     
-          console.log('=== ROUND COMPLETE CHECK ===');
-          console.log('Total orbs:', allOrbs.length);
-          console.log('Matched orbs:', matchedOrbs.length);
-          console.log('Unmatched orbs:', unmatched.length);
+          document.querySelectorAll('.sensory-orb').forEach(orb => {
+        if (orbIds.has(orb.id)) {
+            duplicateOrbs.push(orb);
+            console.log('Found duplicate orb:', orb.id, 'removing...');
+        } else {
+            orbIds.add(orb.id);
+        }
+    });
+    
+    // Remove duplicates
+        duplicateOrbs.forEach(orb => orb.remove());
+    
+    // Now do the normal check
+        const allOrbs = document.querySelectorAll('.sensory-orb');
+        const matchedOrbs = document.querySelectorAll('.sensory-orb.matched');
+        const unmatched = document.querySelectorAll('.sensory-orb:not(.matched)');
+    
+        console.log('=== ROUND COMPLETE CHECK ===');
+        console.log('Removed duplicates:', duplicateOrbs.length);
+        console.log('Total orbs:', allOrbs.length);
+        console.log('Matched orbs:', matchedOrbs.length);
+        console.log('Unmatched orbs:', unmatched.length);
     
     // Log each orb's status
-          allOrbs.forEach(orb => {
-          console.log(`Orb ${orb.id}: ${orb.classList.contains('matched') ? 'MATCHED' : 'UNMATCHED'}`);
-        });
+        allOrbs.forEach(orb => {
+        console.log(`Orb ${orb.id}: ${orb.classList.contains('matched') ? 'MATCHED' : 'UNMATCHED'}`);
+    });
     
-          console.log('roundCompleted flag:', gameState.roundCompleted);
+        console.log('roundCompleted flag:', gameState.roundCompleted);
     
-        if (unmatched.length === 0 && !gameState.roundCompleted) {
-           console.log('✅ Round should complete now!');
-           gameState.roundCompleted = true;
+    if (unmatched.length === 0 && !gameState.roundCompleted) {
+        console.log('✅ Round should complete now!');
+        gameState.roundCompleted = true;
         
-           gameState.score += 200;
-           updateScore();
+        gameState.score += 200;
+        updateScore();
         
-           trackEvent('round_complete', { round: gameState.currentRound });
+        trackEvent('round_complete', { round: gameState.currentRound });
         
-           setTimeout(() => {
+        setTimeout(() => {
             console.log('🚀 Calling nextRound()');
             nextRound();
         }, 1500);
-        } else {
-            console.log('❌ Round NOT completing because:');
-            console.log('- Unmatched orbs:', unmatched.length);
-            console.log('- Round already completed:', gameState.roundCompleted);
-        }
-        }
+    } else {
+        console.log('❌ Round NOT completing because:');
+        console.log('- Unmatched orbs:', unmatched.length);
+        console.log('- Round already completed:', gameState.roundCompleted);
+    }
+    }
 
        function createParticles(element) {
            console.log('Creating particles for round:', gameState.currentRound); // Debug
