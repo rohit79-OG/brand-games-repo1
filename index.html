@@ -2414,30 +2414,37 @@
        }
 
        function setupNormalRound(round) {
-           const gameArea = document.getElementById('gameArea');
-           gameArea.innerHTML = '';
-           
-           const orbsContainer = document.createElement('div');
-           orbsContainer.className = 'orbs-container';
-           
-           const targetsContainer = document.createElement('div');
-           targetsContainer.className = 'targets-container';
-           
-           round.orbs.forEach(orbData => {
-               const orb = createOrb(orbData);
-               orbsContainer.appendChild(orb);
-           });
-           
-           round.targets.forEach(targetData => {
-               const target = createTarget(targetData);
-               targetsContainer.appendChild(target);
-           });
-           
-           gameArea.appendChild(orbsContainer);
-           gameArea.appendChild(targetsContainer);
-           
-           gameState.roundCompleted = false;
-       }
+          const gameArea = document.getElementById('gameArea');
+          gameArea.innerHTML = '';
+    
+       // MOBILE: Remove any existing orbs from entire document
+          document.querySelectorAll('.sensory-orb').forEach(orb => orb.remove());
+          document.querySelectorAll('.target-area').forEach(target => target.remove());
+    
+          const orbsContainer = document.createElement('div');
+          orbsContainer.className = 'orbs-container';
+    
+          const targetsContainer = document.createElement('div');
+          targetsContainer.className = 'targets-container';
+    
+          round.orbs.forEach(orbData => {
+          const orb = createOrb(orbData);
+          orbsContainer.appendChild(orb);
+        });
+    
+          round.targets.forEach(targetData => {
+          const target = createTarget(targetData);
+          targetsContainer.appendChild(target);
+        });
+    
+          gameArea.appendChild(orbsContainer);
+          gameArea.appendChild(targetsContainer);
+    
+          gameState.roundCompleted = false;
+    
+        // DEBUG: Verify clean setup
+          console.log('Round setup complete. Total orbs:', document.querySelectorAll('.sensory-orb').length);
+        }
 
        function createOrb(orbData) {
            const orb = document.createElement('div');
