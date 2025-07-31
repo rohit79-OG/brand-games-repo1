@@ -1,0 +1,17 @@
+echo "# System files" >> .gitignore
+echo ".DS_Store" >> .gitignore
+echo "*.tmp" >> .gitignore
+
+echo "# Asset working files" >> .gitignore
+echo "*.psd" >> .gitignore
+echo "*.ai" >> .gitignore
+
+echo "# Environment files" >> .gitignore
+echo ".env" >> .gitignore
+echo ".DS_Store" >> .gitignore
+echo "**/.DS_Store" >> .gitignore  # Double-star catches all subfolders# Mac system files
+.DS_Store
+*.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+**/.DS_Store
