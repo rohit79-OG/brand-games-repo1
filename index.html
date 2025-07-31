@@ -2543,11 +2543,22 @@
            touchedElement = e.target.closest('.sensory-orb');
            touchStartTime = Date.now();
            touchMoved = false;
-           
-           if (!touchedElement) return;
-           
-           // Create visual clone for dragging
+    
+        if (!touchedElement) return;
+    
+       // MOBILE FIX: Remove any existing touch clone first
+        if (touchClone && touchClone.parentNode) {
+           touchClone.parentNode.removeChild(touchClone);
+           touchClone = null;
+        }
+    
+       // Create visual clone for dragging
            touchClone = touchedElement.cloneNode(true);
+    
+       // CRITICAL: Remove ID from clone to prevent duplicates
+           touchClone.removeAttribute('id');
+           touchClone.classList.add('touch-clone'); // Add identifier class
+    
            touchClone.style.position = 'fixed';
            touchClone.style.pointerEvents = 'none';
            touchClone.style.opacity = '0.8';
@@ -2555,13 +2566,13 @@
            touchClone.style.transform = 'scale(1.1)';
            touchClone.style.transition = 'none';
            document.body.appendChild(touchClone);
-           
+    
            const touch = e.touches[0];
            updateTouchClonePosition(touch.clientX, touch.clientY);
-           
-           // Add visual feedback to original orb
+    
+       // Add visual feedback to original orb
            touchedElement.style.opacity = '0.5';
-       }
+        }
 
        function handleTouchMove(e) {
            if (!touchClone || !touchedElement) return;
@@ -2630,25 +2641,32 @@
         }
 
        function cleanupTouch() {
-           // Remove clone
-           if (touchClone && touchClone.parentNode) {
-               try {
-                   document.body.removeChild(touchClone);
-               } catch (error) {
-                   console.log('Cleanup error:', error);
-               }
-           }
-           
-           // Reset variables
-           touchClone = null;
-           touchedElement = null;
-           touchMoved = false;
-           
-           // Remove drag-over states
-           document.querySelectorAll('.target-area').forEach(t => {
-               t.classList.remove('drag-over');
-           });
-       }
+      // Remove ALL touch clones (in case of multiple)
+            document.querySelectorAll('.touch-clone').forEach(clone => {
+        if (clone.parentNode) {
+            clone.parentNode.removeChild(clone);
+        }
+        });
+    
+      // Remove clone by reference too
+        if (touchClone && touchClone.parentNode) {
+          try {
+               document.body.removeChild(touchClone);
+        } catch (error) {
+            console.log('Cleanup error:', error);
+        }
+        }
+    
+    // Reset variables
+         touchClone = null;
+         touchedElement = null;
+         touchMoved = false;
+    
+    // Remove drag-over states
+       document.querySelectorAll('.target-area').forEach(t => {
+          t.classList.remove('drag-over');
+        });
+        }
 
        function updateTouchClonePosition(x, y) {
            if (touchClone) {
