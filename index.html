@@ -2948,31 +2948,31 @@
            const matchedOrbs = document.querySelectorAll('.sensory-orb.matched');
            const unmatched = document.querySelectorAll('.sensory-orb:not(.matched)');
     
-           console.log('=== ROUND COMPLETE CHECK ===');
-           console.log('Total orbs:', allOrbs.length);
-           console.log('Matched orbs:', matchedOrbs.length);
-           console.log('Unmatched orbs:', unmatched.length);
+          console.log('=== ROUND COMPLETE CHECK ===');
+          console.log('Total orbs:', allOrbs.length);
+          console.log('Matched orbs:', matchedOrbs.length);
+          console.log('Unmatched orbs:', unmatched.length);
     
-       // Log each orb's status
-           allOrbs.forEach(orb => {
-           console.log(`Orb ${orb.id}: ${orb.classList.contains('matched') ? 'MATCHED' : 'UNMATCHED'}`);
+    // Log each orb's status
+          allOrbs.forEach(orb => {
+          console.log(`Orb ${orb.id}: ${orb.classList.contains('matched') ? 'MATCHED' : 'UNMATCHED'}`);
         });
     
-           console.log('roundCompleted flag:', gameState.roundCompleted);
+          console.log('roundCompleted flag:', gameState.roundCompleted);
     
         if (unmatched.length === 0 && !gameState.roundCompleted) {
            console.log('✅ Round should complete now!');
            gameState.roundCompleted = true;
         
            gameState.score += 200;
-            updateScore();
+           updateScore();
         
            trackEvent('round_complete', { round: gameState.currentRound });
         
            setTimeout(() => {
             console.log('🚀 Calling nextRound()');
             nextRound();
-         }, 1500);
+        }, 1500);
         } else {
             console.log('❌ Round NOT completing because:');
             console.log('- Unmatched orbs:', unmatched.length);
