@@ -2969,42 +2969,55 @@
        }
 
        function checkRoundComplete() {
-    // MOBILE FIX: Remove duplicate orbs before checking
-       const orbIds = new Set();
-       const duplicateOrbs = [];
+       // MOBILE FIX: Remove orbs without valid IDs and duplicates
+          const validOrbIds = ['orb1-1', 'orb1-2', 'orb1-3']; // Round 1 valid IDs
+          const currentRound = gameState.currentRound;
     
-          document.querySelectorAll('.sensory-orb').forEach(orb => {
-        if (orbIds.has(orb.id)) {
-            duplicateOrbs.push(orb);
-            console.log('Found duplicate orb:', orb.id, 'removing...');
+      // Generate valid IDs for current round
+      let expectedOrbIds = [];
+      if (currentRound === 1) expectedOrbIds = ['orb1-1', 'orb1-2', 'orb1-3'];
+          else if (currentRound === 2) expectedOrbIds = ['orb2-1', 'orb2-2', 'orb2-3'];
+          else if (currentRound === 3) expectedOrbIds = ['orb3-1', 'orb3-2', 'orb3-3'];
+          else if (currentRound === 4) expectedOrbIds = ['orb4-1', 'orb4-2', 'orb4-3'];
+    
+          const invalidOrbs = [];
+          const seenIds = new Set();
+    
+      document.querySelectorAll('.sensory-orb').forEach(orb => {
+          const orbId = orb.id;
+        
+        // Remove if: no ID, not in expected IDs, or duplicate
+          if (!orbId || !expectedOrbIds.includes(orbId) || seenIds.has(orbId)) {
+               invalidOrbs.push(orb);
+              console.log('Removing invalid/duplicate orb:', orbId || 'NO_ID');
         } else {
-            orbIds.add(orb.id);
+            seenIds.add(orbId);
         }
-    });
+        });
     
-    // Remove duplicates
-        duplicateOrbs.forEach(orb => orb.remove());
+       // Remove invalid orbs
+       invalidOrbs.forEach(orb => orb.remove());
     
-    // Now do the normal check
-        const allOrbs = document.querySelectorAll('.sensory-orb');
+      // Now do the normal check
+         const allOrbs = document.querySelectorAll('.sensory-orb');
         const matchedOrbs = document.querySelectorAll('.sensory-orb.matched');
         const unmatched = document.querySelectorAll('.sensory-orb:not(.matched)');
     
-        console.log('=== ROUND COMPLETE CHECK ===');
-        console.log('Removed duplicates:', duplicateOrbs.length);
-        console.log('Total orbs:', allOrbs.length);
-        console.log('Matched orbs:', matchedOrbs.length);
-        console.log('Unmatched orbs:', unmatched.length);
+       console.log('=== ROUND COMPLETE CHECK ===');
+       console.log('Removed invalid orbs:', invalidOrbs.length);
+       console.log('Total orbs:', allOrbs.length);
+       console.log('Matched orbs:', matchedOrbs.length);
+       console.log('Unmatched orbs:', unmatched.length);
     
     // Log each orb's status
-        allOrbs.forEach(orb => {
-        console.log(`Orb ${orb.id}: ${orb.classList.contains('matched') ? 'MATCHED' : 'UNMATCHED'}`);
+       allOrbs.forEach(orb => {
+           console.log(`Orb ${orb.id}: ${orb.classList.contains('matched') ? 'MATCHED' : 'UNMATCHED'}`);
     });
     
-        console.log('roundCompleted flag:', gameState.roundCompleted);
+           console.log('roundCompleted flag:', gameState.roundCompleted);
     
     if (unmatched.length === 0 && !gameState.roundCompleted) {
-        console.log('✅ Round should complete now!');
+           console.log('✅ Round should complete now!');
         gameState.roundCompleted = true;
         
         gameState.score += 200;
