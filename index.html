@@ -100,8 +100,8 @@
      /* Mobile viewport height fix for start screen */
        @media (max-width: 768px) {
     .start-screen .glass-panel {
-        margin-bottom: 100px; /* Push content up from bottom */
-        max-height: 70vh; /* Limit height to prevent overflow */
+        margin-bottom: 80px; /* Push content up from bottom */
+        max-height: 75vh; /* Limit height to prevent overflow */
         overflow-y: auto;
     }
 }  
@@ -2645,36 +2645,44 @@
                touchClone.style.top = (y - 40) + 'px';
            }
        }
-
-       // Match handling
+     
+        //Match handling
        function handleMatch(orb, target) {
-           orb.classList.add('matched');
-           target.classList.add('matched');
-           
-           const trait = orb.dataset.trait;
-           if (trait && gameState.personalityTraits[trait] !== undefined) {
-               gameState.personalityTraits[trait] += 2;
-           }
-           
-           gameState.score += 100;
-           updateScore();
-           
-           createParticles(target);
-           
-           // Play match sound if audio is initialized
-           if (audioInitialized) {
-               playSound('matchSound');
-           }
-           
-           // Mobile haptic feedback
-           if ('vibrate' in navigator) {
-               navigator.vibrate(50);
-           }
-           
-           trackEvent('correct_match', { round: gameState.currentRound });
-           
-           checkRoundComplete();
+          console.log('handleMatch called with:', orb?.id, target?.id); // DEBUG
+    
+       if (!orb || !target) {
+        console.error('handleMatch: Missing orb or target', {orb, target});
+        return;
        }
+    
+        orb.classList.add('matched');
+        target.classList.add('matched');
+    
+       const trait = orb.dataset.trait;
+      if (trait && gameState.personalityTraits[trait] !== undefined) {
+        gameState.personalityTraits[trait] += 2;
+      }
+    
+       gameState.score += 100;
+       updateScore();
+    
+      createParticles(target);
+    
+    // Play match sound if audio is initialized
+     if (audioInitialized) {
+        playSound('matchSound');
+     }
+    
+    // Mobile haptic feedback
+     if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+     }
+    
+       trackEvent('correct_match', { round: gameState.currentRound });
+    
+       console.log('About to call checkRoundComplete'); // DEBUG
+       checkRoundComplete();
+    }
 
        // Vibe Check feature - MOBILE OPTIMIZED
        function handleVibeCheck(e) {
@@ -2932,20 +2940,25 @@
        }
 
        function checkRoundComplete() {
-           const unmatched = document.querySelectorAll('.sensory-orb:not(.matched)');
-           if (unmatched.length === 0 && !gameState.roundCompleted) {
-               gameState.roundCompleted = true;
-               
-               gameState.score += 200;
-               updateScore();
-               
-               trackEvent('round_complete', { round: gameState.currentRound });
-               
-               setTimeout(() => {
-                   nextRound();
-               }, 1500);
-           }
-       }
+          const unmatched = document.querySelectorAll('.sensory-orb:not(.matched)');
+          console.log('checkRoundComplete: unmatched orbs:', unmatched.length); // DEBUG
+          console.log('roundCompleted flag:', gameState.roundCompleted); // DEBUG
+    
+       if (unmatched.length === 0 && !gameState.roundCompleted) {
+          console.log('Round should complete now!'); // DEBUG
+          gameState.roundCompleted = true;
+        
+          gameState.score += 200;
+          updateScore();
+        
+            trackEvent('round_complete', { round: gameState.currentRound });
+        
+         setTimeout(() => {
+            console.log('Calling nextRound()'); // DEBUG
+            nextRound();
+        }, 1500);
+        }
+        }
 
        function createParticles(element) {
            console.log('Creating particles for round:', gameState.currentRound); // Debug
