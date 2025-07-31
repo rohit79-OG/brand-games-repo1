@@ -97,6 +97,14 @@
         width: 400px;
     }
 
+     /* Mobile viewport height fix for start screen */
+       @media (max-width: 768px) {
+    .start-screen .glass-panel {
+        margin-bottom: 100px; /* Push content up from bottom */
+        max-height: 70vh; /* Limit height to prevent overflow */
+        overflow-y: auto;
+    }
+}  
     /* Typography */
     h1 {
         font-size: 2.5rem;
@@ -1336,7 +1344,7 @@
             justify-content: flex-start;
             padding: 20px 10px;
             top: 80px;
-            bottom: 80px;
+            bottom: 150px;
         }
 
         /* Orbs container - horizontal at top */
@@ -1512,12 +1520,12 @@
 
        /* Ensure buttons don't overlap with system UI */
         .hint-button {
-            bottom: 20px;
+            bottom: 100px;
             right: 20px;
         }
 
        .audio-toggle {
-            bottom: 20px;
+            bottom: 100px;
             left: 20px;
         }
         }
@@ -2567,50 +2575,48 @@
 
        function handleTouchEnd(e) {
            console.log('Touch end triggered');
-           
-           if (!touchClone || !touchedElement) return;
-           
-           const touchDuration = Date.now() - touchStartTime;
-           const touch = e.changedTouches[0];
-           
-           // Restore original orb appearance
-           touchedElement.style.opacity = '1';
-           
-           // Check if this was a tap (short duration, no movement) for vibe check
-           if (touchDuration < 300 && !touchMoved) {
-               console.log('Detected tap for vibe check');
-               // Clean up first
-               cleanupTouch();
-               // Then handle vibe check
-               setTimeout(() => {
-                   handleVibeCheck({ target: touchedElement });
-               }, 50);
-               return;
-           }
-           
-           // Handle drag and drop if moved
-           if (touchMoved) {
-               const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-               const targetBelow = elementBelow?.closest('.target-area');
-               
-               console.log('Touch drop - target found:', !!targetBelow);
-               
-               if (targetBelow) {
-                   // Use setTimeout to prevent freeze - CRITICAL FIX
-                   setTimeout(() => {
-                       try {
-                           handleMatch(touchedElement, targetBelow);
-                           console.log('Touch match handled successfully');
-                       } catch (error) {
-                           console.error('Touch match handling error:', error);
-                       }
-                   }, 100);
-               }
-           }
-           
-           // Clean up
-           cleanupTouch();
-       }
+    
+          if (!touchClone || !touchedElement) return;
+    
+          const touchDuration = Date.now() - touchStartTime;
+          const touch = e.changedTouches[0];
+    
+    // Restore original orb appearance
+       touchedElement.style.opacity = '1';
+    
+    // Check if this was a tap (short duration, no movement) for vibe check
+         if (touchDuration < 300 && !touchMoved) {
+            console.log('Detected tap for vibe check');
+        // Clean up first
+          cleanupTouch();
+        // Then handle vibe check
+          setTimeout(() => {
+            handleVibeCheck({ target: touchedElement });
+        }, 50);
+        return;
+        }
+    
+       // Handle drag and drop if moved
+        if (touchMoved) {
+           const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+           const targetBelow = elementBelow?.closest('.target-area');
+        
+           console.log('Touch drop - target found:', !!targetBelow);
+        
+        if (targetBelow) {
+            // Immediate call instead of setTimeout to prevent iOS issues
+            try {
+                handleMatch(touchedElement, targetBelow);
+                console.log('Touch match handled successfully');
+            } catch (error) {
+                console.error('Touch match handling error:', error);
+            }
+        }
+        }
+    
+          // Clean up
+             cleanupTouch();
+        }
 
        function cleanupTouch() {
            // Remove clone
