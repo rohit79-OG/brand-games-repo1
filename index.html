@@ -1317,7 +1317,7 @@
             }
         }
 
-        /* Mobile Layout - COMPLETELY FIXED */
+        /* Mobile Layout */
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
             h2 { font-size: 1.5rem; }
@@ -1328,7 +1328,7 @@
                 width: 95%;
             }
     
-            /* FIXED: Mobile game area layout */
+            /* Mobile game area layout */
             .game-area {
                 flex-direction: column;
                 gap: 20px;
@@ -1496,7 +1496,31 @@
                 font-size: 1.1rem;
                 margin: 15px 0;
             }
-        }
+            
+            .hint-button, .audio-toggle {
+                -webkit-tap-highlight-color: transparent;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                user-select: none;
+                touch-action: manipulation;
+                transition: transform 0.1s ease;
+            }
+    
+            .hint-button:active, .audio-toggle:active {
+                transform: scale(0.95);
+            }
+    
+           /* Ensure buttons don't overlap with system UI */
+            .hint-button {
+                bottom: 20px;
+                right: 20px;
+            }
+    
+           .audio-toggle {
+                bottom: 20px;
+                left: 20px;
+            }
+            }
 
         @media (max-width: 480px) {
             .btn {
@@ -1774,31 +1798,48 @@
         let audioMuted = false;
 
         // Initialize audio
-        async function initAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // Resume context if it's suspended
+       async function initAudio() {
+          try {
+              audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // MOBILE AUDIO: iOS requires user interaction
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // Wait for first user interaction
+            const enableAudio = async () => {
                 if (audioContext.state === 'suspended') {
                     await audioContext.resume();
                 }
-                
-                // Decode all audio assets
-                for (const [key, dataUri] of Object.entries(audioAssets)) {
-                    try {
-                        const base64 = dataUri.split(',')[1];
-                        const arrayBuffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
-                        audioBuffers[key] = await audioContext.decodeAudioData(arrayBuffer);
-                    } catch (decodeError) {
-                        console.log(`Failed to decode ${key}:`, decodeError);
-                    }
-                }
-            } catch (error) {
-                console.log('Audio initialization failed:', error);
-                // Continue without audio
-                audioMuted = true;
+                console.log('Mobile audio enabled');
+                document.removeEventListener('touchstart', enableAudio);
+                document.removeEventListener('click', enableAudio);
+            };
+            
+                document.addEventListener('touchstart', enableAudio, { once: true });
+                document.addEventListener('click', enableAudio, { once: true });
             }
-        }
+        
+           // Resume context if suspended
+           if (audioContext.state === 'suspended') {
+              await audioContext.resume();
+            }
+        
+            // Decode all audio assets (keep existing code)
+            for (const [key, dataUri] of Object.entries(audioAssets)) {
+            try {
+                const base64 = dataUri.split(',')[1];
+                const arrayBuffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
+                audioBuffers[key] = await audioContext.decodeAudioData(arrayBuffer);
+            } catch (decodeError) {
+                console.log(`Failed to decode ${key}:`, decodeError);
+            }
+           }
+           } catch (error) {
+              console.log('Audio initialization failed:', error);
+              audioMuted = true;
+            }
+            }
 
         // Play sound effect
         function playSound(soundName, loop = false) {
@@ -2436,20 +2477,46 @@
             }
         }
 
-        function handleTouchEnd(e) {
-            if (touchClone) {
-                const touch = e.changedTouches[0];
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                const targetBelow = elementBelow?.closest('.target-area');
-                
-                if (targetBelow && touchedElement) {
+       function handleTouchEnd(e) {
+            console.log('Touch end triggered'); // Debug log
+    
+        if (touchClone && touchedElement) {
+             const touch = e.changedTouches[0];
+             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+             const targetBelow = elementBelow?.closest('.target-area');
+        
+            console.log('Target found:', targetBelow); // Debug log
+        
+        if (targetBelow) {
+            // CRITICAL FIX: Use setTimeout to prevent freeze
+            setTimeout(() => {
+                try {
                     handleMatch(touchedElement, targetBelow);
+                    console.log('Match handled successfully'); // Debug log
+                } catch (error) {
+                    console.error('Match handling error:', error);
                 }
-                
+            }, 100);
+        }
+        
+        // Clean up immediately
+        try {
+            if (touchClone && touchClone.parentNode) {
                 document.body.removeChild(touchClone);
-                touchClone = null;
-                document.querySelectorAll('.target-area').forEach(t => t.classList.remove('drag-over'));
             }
+        } catch (error) {
+            console.log('Cleanup error:', error);
+        }
+        
+        // Reset variables
+        touchClone = null;
+        touchedElement = null;
+        
+        // Remove drag-over states
+        document.querySelectorAll('.target-area').forEach(t => {
+            t.classList.remove('drag-over');
+        });
+          }
         }
 
         function updateTouchClonePosition(x, y) {
